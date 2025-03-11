@@ -6,10 +6,14 @@ api = Namespace('reviews', description='Review operations')
 # Define the review model for input validation and documentation
 review_model = api.model('Review', {
     'text': fields.String(required=True, description='Text of the review'),
-    'rating': fields.Integer(required=True, description='Rating of the place (1-5)'),
+    'rating': fields.Integer(
+        required=True,
+        description='Rating of the place (1-5)'
+        ),
     'user_id': fields.String(required=True, description='ID of the user'),
     'place_id': fields.String(required=True, description='ID of the place')
 })
+
 
 @api.route('/')
 class ReviewList(Resource):
@@ -22,7 +26,7 @@ class ReviewList(Resource):
         new_review = facade.create_review(review_data)
         if not new_review:
             return {'error': 'Invalid input data'}, 400
-        
+
         return new_review, 201
 
     @api.response(200, 'List of reviews retrieved successfully')
@@ -53,7 +57,7 @@ class ReviewResource(Resource):
         updated_review = facade.update_review(review_id, review_data)
         if not updated_review:
             return {'error': 'Review not found or invalid data'}, 404
-        
+
         return updated_review, 200
 
     @api.response(200, 'Review deleted successfully')

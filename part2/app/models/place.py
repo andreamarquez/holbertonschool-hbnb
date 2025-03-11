@@ -1,6 +1,7 @@
 from datetime import datetime
 from .base_model import BaseModel
 
+
 class Place(BaseModel):
     def __init__(self, title, description, price, latitude, longitude, owner):
         super().__init__()
@@ -22,10 +23,10 @@ class Place(BaseModel):
     def add_amenity(self, amenity):
         """Add an amenity to the place."""
         self.amenities.append(amenity)
+
     def to_dict_with_owner_id(self):
         """Convert instance to dictionary with owner_id instead of owner"""
         place_dict = self.to_dict()
         place_dict['owner_id'] = self.owner
         place_dict.pop('owner', None)
         return place_dict
-

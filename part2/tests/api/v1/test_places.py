@@ -2,21 +2,25 @@ import pytest
 from app import create_app
 from app.services.facade import HBnBFacade
 
+
 @pytest.fixture(scope='session')
 def app():
     """Initialize the Flask application in test mode"""
     app = create_app(config_name="testing")
     return app
 
+
 @pytest.fixture(scope='session')
 def client(app):
     """Create a test client for the Flask application"""
     return app.test_client()
 
+
 @pytest.fixture(scope='session')
 def facade():
     """Initialize the HBnBFacade"""
     return HBnBFacade()
+
 
 @pytest.fixture(scope='session')
 def create_user(client):
@@ -27,8 +31,13 @@ def create_user(client):
             "last_name": last_name,
             "email": email,
         })
-        return response.get_json().get('id') if response.status_code == 201 else None
+        return (
+            response.get_json().get('id')
+            if response.status_code == 201
+            else None
+        )
     return _create_user
+
 
 def test_create_place(client, create_user):
     """Test the creation of a place"""
@@ -51,15 +60,18 @@ def test_create_place(client, create_user):
     assert data["title"] == "Beautiful Apartment"
     assert data["owner_id"] == owner_id
 
+
 def test_get_places(client):
     """Test retrieving the list of places"""
     response = client.get('/api/v1/places/')
     assert response.status_code == 200
 
+
 def test_get_place_not_found(client):
     """Test retrieving a non-existent place"""
     response = client.get('/api/v1/places/999')
     assert response.status_code == 404
+
 
 def test_update_place(client, create_user):
     """Test updating an existing place"""
@@ -96,6 +108,7 @@ def test_update_place(client, create_user):
     assert data["description"] == "An updated description"
     assert data["price"] == 150.0
 
+
 def test_delete_place(client, create_user):
     """Test deleting an existing place"""
     # Create a user to be the owner of the place
@@ -127,6 +140,7 @@ def test_delete_place(client, create_user):
     data = response.get_json()
     assert data["message"] == "Not found"
 
+
 def test_create_place_missing_data(client):
     """Test creating a place with missing data"""
 
@@ -144,6 +158,7 @@ def test_create_place_missing_data(client):
     assert "message" in data
     assert "errors" in data
     assert data["errors"]["title"] == "'title' is a required property"
+
 
 def test_create_place_invalid_data(client, create_user):
     """Test creating a place with invalid data"""
