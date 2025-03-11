@@ -1,0 +1,17 @@
+sequenceDiagram
+    participant User
+    participant API
+    participant PlaceManager
+    participant PlaceRepository
+    participant Database
+
+    User->>+API: GET /places
+    API->>+PlaceManager: getAllPlaces()
+    PlaceManager->>+PlaceRepository: fetchAll()
+    PlaceRepository->>+Database: SELECT * FROM places
+    Database-->>-PlaceRepository: Returns list of places
+
+    PlaceRepository-->>-PlaceManager: Returns formatted list
+    PlaceManager-->>-API: Returns JSON response
+    API-->>User: HTTP 200 OK (List of places
+

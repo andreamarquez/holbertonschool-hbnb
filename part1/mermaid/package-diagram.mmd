@@ -1,0 +1,37 @@
+---
+config:
+  theme: default
+  themeVariables:
+    primaryColor: '#ffcc00'
+    edgeLabelBackground: '#ffffff'
+    tertiaryColor: '#ffffff'
+  look: handDrawn
+---
+classDiagram
+    class PresentationLayer {
+        +UserService
+        +PlaceService
+        +ReviewService
+        +AmenityService
+        +UserAPI
+        +PlaceAPI
+        +ReviewAPI
+        +AmenityAPI
+    }
+    class BusinessLogicLayer {
+        +UserManager
+        +PlaceManager
+        +ReviewManager
+        +AmenityManager
+        +User
+        +Place
+        +Review
+        +Amenity
+        +AuthenticationService
+        +AuthorizationService
+    }
+    class PersistenceLayer {
+        +DatabaseAccessObject
+    }
+    PresentationLayer --> BusinessLogicLayer : Facade
+    BusinessLogicLayer --> PersistenceLayer : Facade

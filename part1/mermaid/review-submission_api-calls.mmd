@@ -1,0 +1,23 @@
+sequenceDiagram
+    participant User
+    participant API
+    participant ReviewManager
+    participant ReviewRepository
+    participant Database
+
+    User->>+API: POST /reviews (place_id, rating, comment)
+    API->>+ReviewManager: validateReviewData()
+    ReviewManager-->>-API: Error 400 (Invalid data)?
+    API-->>User: HTTP 400 Bad Request
+
+    API->>+ReviewRepository: checkUserStay(user_id, place_id)
+    ReviewRepository-->>-API: Error 403 (User has not stayed at this place)?
+    API-->>User: HTTP 403 Forbidden
+
+    API->>+ReviewRepository: saveReview(user_id, place_id, rating, comment)
+    ReviewRepository->>+Database: INSERT INTO reviews(...)
+    Database-->>-ReviewRepository: Review saved
+
+    ReviewRepository-->>-API: returns review ID
+    API-->>User: HTTP 201 Created (Review ID)
+    

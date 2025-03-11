@@ -1,0 +1,81 @@
+---
+config:
+  theme: default
+  themeVariables:
+    primaryColor: '#ffcc00'
+    edgeLabelBackground: '#ffffff'
+    tertiaryColor: '#ffffff'
+  look: handDrawn
+---
+classDiagram
+    class UserManager {
+        +createUser()
+        +updateUser()
+        +getUser()
+        +deleteUser()
+    }
+
+    class PlaceManager {
+        +createPlace()
+        +updatePlace()
+        +getPlace()
+        +deletePlace()
+    }
+
+    class ReviewManager {
+        +createReview()
+        +updateReview()
+        +getReview()
+        +deleteReview()
+    }
+
+    class AmenityManager {
+        +createAmenity()
+        +updateAmenity()
+        +getAmenity()
+        +deleteAmenity()
+    }
+
+    class AuthenticationService {
+        +authenticate()
+        +logout()
+    }
+
+    class AuthorizationService {
+        +authorize()
+    }
+
+    %% Entities
+    %% To complete (add props and/or methods of each class)
+    class User {
+
+    }
+
+    class Place {
+
+    }
+
+    class Review {
+
+    }
+
+    class Amenity {
+
+    }
+
+    class UserManager {
+
+    }
+
+
+    %% Relationships between managers and entities
+
+    UserManager --> User
+    PlaceManager --> Place
+    ReviewManager --> Review
+    AmenityManager --> Amenity
+    AuthenticationService --> UserManager
+    AuthorizationService --> UserManager
+
+    %% Todo: add Relationships between Entities classes
+    %% (like Places & Amenities Relationships, etc)

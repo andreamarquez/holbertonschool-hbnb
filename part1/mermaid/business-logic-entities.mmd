@@ -1,0 +1,53 @@
+classDiagram
+    %% User entity
+    class User {
+        +UUID id
+        +String firstName
+        +String lastName
+        +String email
+        +String password
+        +DateTime createdAt
+        +DateTime updatedAt
+        +register() void
+        +login() void
+        +logout() void
+    }
+
+    %% Place entity
+    class Place {
+        +UUID id
+        +String name
+        +String description
+        +Double pricePerNight
+        +String location
+        +DateTime createdAt
+        +DateTime updatedAt
+        +calculateRating() Double
+        +reserve(User user) void
+    }
+
+    %% Review entity
+    class Review {
+        +UUID id
+        +String content
+        +Double rating
+        +DateTime createdAt
+        +DateTime updatedAt
+        +addReview(User user, Place place) void
+    }
+
+    %% Amenity entity
+    class Amenity {
+        +UUID id
+        +String name
+        +String description
+        +DateTime createdAt
+        +DateTime updatedAt
+    }
+
+    %% Relationships
+    User --> Review : "1..* writes"
+    Place --> Review : "1..* has"
+    Place o-- Amenity : "1..* includes"
+    User --> Place : "0..* reserves"
+

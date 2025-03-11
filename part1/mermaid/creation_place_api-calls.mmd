@@ -1,0 +1,19 @@
+sequenceDiagram
+    participant User
+    participant API
+    participant PlaceManager
+    participant PlaceRepository
+    participant Database
+
+    User->>+API: POST /places (title, description, price, latitude, longitude)
+    API->>+PlaceManager: validatePlaceData()
+    PlaceManager-->>-API: Error 400 (Invalid data)?
+    API-->>User: HTTP 400 Bad Request
+
+    API->>+PlaceRepository: savePlace(title, description, price, latitude, longitude, ownerID)
+    PlaceRepository->>+Database: INSERT INTO places(...)
+    Database-->>-PlaceRepository: Place saved
+
+    PlaceRepository-->>-API: returns place ID
+    API-->>User: HTTP 201 Created (Place ID)
+    

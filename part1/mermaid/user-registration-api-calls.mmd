@@ -1,0 +1,26 @@
+sequenceDiagram
+    participant User
+    participant API
+    participant UserManager
+    participant UserRepository
+    participant Database
+
+    User->>+API: POST /users (firstName, lastName, email, password)
+    API->>+UserManager: validateUserData()
+    UserManager-->>-API: Error 400 (Invalid data)?
+    API-->>User: HTTP 400 Bad Request
+
+    API->>+UserRepository: checkIfEmailExists(email)
+    UserRepository-->>-API: Error 409 (Email already registered)?
+    API-->>User: HTTP 409 Conflict
+
+    API->>+UserManager: hashPassword(password)
+    UserManager-->>API: returns hashed password
+
+    API->>+UserRepository: saveUser(firstName, lastName, email, hashedPassword)
+    UserRepository->>+Database: INSERT INTO users(...)
+    Database-->>-UserRepository: User saved
+
+    UserRepository-->>-API: returns user ID
+    API-->>User: HTTP 201 Created (User ID)
+    
