@@ -3,7 +3,6 @@ In the README.md file, write a brief overview of the project setup:
 a) Describe the purpose of each directory and file.
 b) Include instructions on how to install dependencies and run the application.
 
-
 ### Instructions
 
 #### Dependencies
