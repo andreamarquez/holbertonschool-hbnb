@@ -3,6 +3,7 @@ from .base_model import BaseModel
 # from .user import User
 # from .place import Place
 
+
 class Review(BaseModel):
     def __init__(self, text, rating, place, user):
         super().__init__()
@@ -12,6 +13,7 @@ class Review(BaseModel):
         self.user = user
         self.created_at = datetime.now()
         self.updated_at = datetime.now()
+
     def to_dict_with_ids(self):
         """Convert instance to dictionary with owner_id instead of owner"""
         place_dict = self.to_dict()

@@ -32,8 +32,13 @@ place_model = api.model('Place', {
     'latitude': fields.Float(required=True, description='Latitude'),
     'longitude': fields.Float(required=True, description='Longitude'),
     'owner_id': fields.String(required=True, description='Owner ID'),
-    'amenities': fields.List(fields.String, required=True, description="Amenities IDs"),
+    'amenities': fields.List(
+        fields.String,
+        required=True,
+        description="Amenities IDs"
+        ),
 })
+
 
 @api.route('/')
 class PlaceList(Resource):
@@ -54,6 +59,7 @@ class PlaceList(Resource):
         places = facade.get_all_places()
         return places, 200
 
+
 @api.route('/<place_id>')
 class PlaceResource(Resource):
     @api.response(200, 'Place details')
@@ -63,7 +69,7 @@ class PlaceResource(Resource):
         place = facade.get_place(place_id)
         if not place:
             return {'message': 'Not found'}, 404
-        
+
         # retrieve reviews associated with the location
         reviews = facade.get_reviews_by_place(place_id)
         place['reviews'] = reviews
@@ -91,4 +97,3 @@ class PlaceResource(Resource):
         if not updated_place:
             return {'message': 'Not found'}, 404
         return updated_place, 200
-    

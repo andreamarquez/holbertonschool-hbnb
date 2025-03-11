@@ -8,12 +8,13 @@ amenity_model = api.model('Amenity', {
     'name': fields.String(required=True, description='Name of the amenity'),
 })
 
+
 @api.route('/')
 class AmenityList(Resource):
     """
     Handles the creation and retrieval of amenities.
     """
-    
+
     @api.expect(amenity_model)
     @api.response(201, 'Amenity successfully created')
     @api.response(400, 'Invalid input data')
@@ -38,11 +39,12 @@ class AmenityList(Resource):
         Handles the GET request to fetch all available amenities.
         """
         amenities = facade.get_all_amenities()
-        
+
         if not amenities:
             return {'error': 'No amenities found'}, 404
-        
+
         return amenities, 200
+
 
 @api.route('/<amenity_id>')
 class AmenityResource(Resource):
@@ -56,10 +58,10 @@ class AmenityResource(Resource):
         Get amenity details by ID.
         """
         amenity = facade.get_amenity(amenity_id)
-        
+
         if not amenity:
             return {'error': 'Amenity not found'}, 404
-        
+
         return amenity, 200
 
     @api.expect(amenity_model)
@@ -72,15 +74,15 @@ class AmenityResource(Resource):
         Handles the PUT request to update an amenity's data.
         """
         amenity_data = api.payload
-        
+
         if not amenity_data:
             return {'message': 'Invalid input data'}, 400
-        
+
         updated_amenity = facade.update_amenity(amenity_id, amenity_data)
-        
+
         if not updated_amenity:
             return {'error': 'Amenity not found'}, 404
-        
+
         return updated_amenity, 200
 
     @api.response(200, 'Amenity successfully deleted')
@@ -91,9 +93,8 @@ class AmenityResource(Resource):
         Handles the DELETE request to remove an amenity by its ID.
         """
         success = facade.delete_amenity(amenity_id)
-        
+
         if success:
             return {'message': 'Amenity deleted successfully'}, 200
         else:
             return {'error': 'Amenity not found'}, 404
-

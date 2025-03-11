@@ -1,0 +1,53 @@
+name: Python hbnb application
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  pycodestyle:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12.8'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r part2/requirements.txt
+        pip install pycodestyle
+
+    - name: Run pycodestyle
+      run: pycodestyle part2/
+
+  pytest:
+    runs-on: ubuntu-latest
+    needs: pycodestyle
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12.8'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r part2/requirements.txt
+        pip install pytest
+
+    - name: Run pytest
+      run: pytest part2/tests
