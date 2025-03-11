@@ -1,4 +1,4 @@
-name: Python application
+name: Python hbnb application
 
 on:
   pull_request:
@@ -25,7 +25,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r part2/requirements.txt
-        pip install pycodestyle
+        pip install pycodestyle pytest
 
     - name: Run pycodestyle
       run: pycodestyle part2/
