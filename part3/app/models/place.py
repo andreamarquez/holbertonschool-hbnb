@@ -10,7 +10,7 @@ class Place(BaseModel):
         self.price = price
         self.latitude = latitude
         self.longitude = longitude
-        self.owner = owner # Owner is the id of the user who owns the place (for now)
+        self.owner = owner  # Owner is id of user who owns the place(for now)
         self.reviews = []  # List to store related reviews ids
         self.amenities = []  # List to store related amenities ids
         self.created_at = datetime.now()
