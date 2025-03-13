@@ -7,14 +7,17 @@ def test_place_creation():
     owner = User(
         first_name="Alice",
         last_name="Smith",
-        email="alice.smith@example.com")
+        email="alice.smith@example.com",
+        password="securepassword"
+    )
     place = Place(
         title="Cozy Apartment",
         description="A nice place to stay",
         price=100,
         latitude=37.7749,
         longitude=-122.4194,
-        owner=owner)
+        owner=owner
+    )
 
     # Adding a review
     review = Review(text="Great stay!", rating=5, place=place, user=owner)

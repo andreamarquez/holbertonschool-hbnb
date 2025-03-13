@@ -12,6 +12,7 @@ class User(BaseModel):
         self.is_admin = is_admin
         self.created_at = datetime.now()
         self.updated_at = datetime.now()
+        self.hash_password(password)
 
     def hash_password(self, password):
         # Hashes the password before storing it

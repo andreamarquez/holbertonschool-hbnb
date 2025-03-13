@@ -18,11 +18,12 @@ def client(app):
 @pytest.fixture
 def create_user(client):
     """Helper function to create a user"""
-    def _create_user(first_name, last_name, email):
+    def _create_user(first_name, last_name, email, password='12345678'):
         response = client.post('/api/v1/users/', json={
             "first_name": first_name,
             "last_name": last_name,
             "email": email,
+            "password": password
         })
         return (
             response.get_json().get('id')

@@ -18,11 +18,12 @@ def client(app):
 @pytest.fixture
 def create_user(client):
     """Helper function to create a user"""
-    def _create_user(first_name, last_name, email):
+    def _create_user(first_name, last_name, email, password='12345678'):
         response = client.post('/api/v1/users/', json={
             "first_name": first_name,
             "last_name": last_name,
             "email": email,
+            "password": password
         })
         return (
             response.get_json().get('id')
@@ -38,6 +39,7 @@ def test_create_user(client):
         "first_name": "Jane",
         "last_name": "Doe",
         "email": "jane.doe@example.com",
+        "password": "12345678"
     })
     assert response.status_code == 201
     data = response.get_json()
@@ -98,6 +100,7 @@ def test_create_user_fail_duplicate_email(client, create_user):
         "first_name": "Davis",
         "last_name": "Daniels",
         "email": email,
+        "password": "12345678"
     })
     assert response.status_code == 400
     data = response.get_json()
@@ -132,7 +135,8 @@ def test_get_all_users(client, create_user):
         # Use the actual timestamp from the response
         "created_at": alice["created_at"],
         # Use the actual timestamp from the response
-        "updated_at": alice["updated_at"]
+        "updated_at": alice["updated_at"],
+        "password": alice["password"]
     }
 
     assert alice is not None
