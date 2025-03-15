@@ -1,42 +1,4 @@
 import pytest
-from app import create_app
-from app.services.facade import HBnBFacade
-
-
-@pytest.fixture(scope='session')
-def app():
-    """Initialize the Flask application in test mode"""
-    app = create_app(config_name="testing")
-    return app
-
-
-@pytest.fixture(scope='session')
-def client(app):
-    """Create a test client for the Flask application"""
-    return app.test_client()
-
-
-@pytest.fixture(scope='session')
-def facade():
-    """Initialize the HBnBFacade"""
-    return HBnBFacade()
-
-
-@pytest.fixture(scope='session')
-def create_user(client):
-    """Helper function to create a user"""
-    def _create_user(first_name, last_name, email):
-        response = client.post('/api/v1/users/', json={
-            "first_name": first_name,
-            "last_name": last_name,
-            "email": email
-        })
-        return (
-            response.get_json().get('id')
-            if response.status_code == 201
-            else None
-        )
-    return _create_user
 
 
 def test_create_place(client, create_user):

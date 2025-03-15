@@ -1,35 +1,4 @@
 import pytest
-from app import create_app
-
-
-@pytest.fixture
-def app():
-    """Initialize the Flask application in test mode"""
-    app = create_app(config_name="testing")
-    return app
-
-
-@pytest.fixture
-def client(app):
-    """Create a test client for the Flask application"""
-    return app.test_client()
-
-
-@pytest.fixture
-def create_user(client):
-    """Helper function to create a user"""
-    def _create_user(first_name, last_name, email):
-        response = client.post('/api/v1/users/', json={
-            "first_name": first_name,
-            "last_name": last_name,
-            "email": email
-        })
-        return (
-            response.get_json().get('id')
-            if response.status_code == 201
-            else None
-        )
-    return _create_user
 
 
 def test_create_user(client):
@@ -38,13 +7,18 @@ def test_create_user(client):
         "first_name": "Jane",
         "last_name": "Doe",
         "email": "jane.doe@example.com",
+        "password": "12345678"
     })
     assert response.status_code == 201
     data = response.get_json()
+    user_id = data["id"]
     assert "id" in data
+    response = client.get(f'/api/v1/users/{user_id}')
+    data = response.get_json()
     assert data["first_name"] == "Jane"
     assert data["last_name"] == "Doe"
     assert data["email"] == "jane.doe@example.com"
+    assert "password" not in data  # Assert 'password' is not in the response
 
 
 def test_create_user_fail_missing_data(client):
@@ -98,6 +72,7 @@ def test_create_user_fail_duplicate_email(client, create_user):
         "first_name": "Davis",
         "last_name": "Daniels",
         "email": email,
+        "password": "12345678"
     })
     assert response.status_code == 400
     data = response.get_json()
@@ -136,6 +111,7 @@ def test_get_all_users(client, create_user):
     }
 
     assert alice is not None
+    assert "password" not in alice  # Assert 'password' is not in the response
     assert alice == expected_alice
 
 
@@ -143,8 +119,10 @@ def test_get_user_by_id(client, create_user):
     """Test retrieving a specific user by ID"""
     user_id = create_user("Betty", "Smith", "betty@example.com")
     response = client.get(f'/api/v1/users/{user_id}')
+    user = response.get_json()
     assert response.status_code == 200
-    assert response.get_json()["email"] == "betty@example.com"
+    assert user["email"] == "betty@example.com"
+    assert "password" not in user  # Assert password' is not in the response
 
 
 def test_get_user_not_found(client):
@@ -155,12 +133,9 @@ def test_get_user_not_found(client):
 
 def test_update_user(client, create_user):
     """Test updating an existing user"""
-    # create_user does a post
     user_id = create_user("Bob", "Brown", "bob@example.com")
 
-    # as the user was created w/ post, we can do a put
     response = client.put(f'/api/v1/users/{user_id}', json={
-        # we change the first_name
         "first_name": "Robert",
         "last_name": "Brown",
         "email": "bob@example.com",
@@ -181,16 +156,13 @@ def test_update_user_not_found(client):
 
 def test_delete_user(client, create_user):
     """Test deleting an existing user"""
-    # Create a user
     user_id = create_user("Charlie", "Chaplin", "charlie@example.com")
 
-    # Delete the user
     response = client.delete(f'/api/v1/users/{user_id}')
     assert response.status_code == 200
     data = response.get_json()
     assert data["message"] == "User deleted successfully"
 
-    # Verify the user is no longer retrievable
     response = client.get(f'/api/v1/users/{user_id}')
     assert response.status_code == 404
     data = response.get_json()

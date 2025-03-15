@@ -25,10 +25,14 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r part2/requirements.txt
+        pip install -r part3/requirements.txt
         pip install pycodestyle
 
-    - name: Run pycodestyle
+    - name: Run pycodestyle for part2
       run: pycodestyle part2/
+
+    - name: Run pycodestyle for part3
+      run: pycodestyle part3/
 
   pytest:
     runs-on: ubuntu-latest
@@ -47,7 +51,11 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r part2/requirements.txt
+        pip install -r part3/requirements.txt
         pip install pytest
 
-    - name: Run pytest
+    - name: Run pytest for part2
       run: pytest part2/tests
+
+    - name: Run pytest for part3
+      run: pytest part3/tests
