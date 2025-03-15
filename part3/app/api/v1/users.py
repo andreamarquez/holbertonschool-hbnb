@@ -66,6 +66,7 @@ class UserResource(Resource):
         user = facade.get_user(user_id)
         if not user:
             return {'error': 'User not found'}, 404
+        user.pop('password', None)
         return user, 200
 
     @api.response(200, 'User updated successfully')

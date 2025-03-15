@@ -17,7 +17,7 @@ def test_create_user(client):
     assert data["first_name"] == "Jane"
     assert data["last_name"] == "Doe"
     assert data["email"] == "jane.doe@example.com"
-
+    assert "password" not in data  # Assert that 'password' is not in the response
 
 def test_create_user_fail_missing_data(client):
     """Test creating a user with missing data"""
@@ -32,7 +32,6 @@ def test_create_user_fail_missing_data(client):
     assert data["errors"]["email"] == "'email' is a required property"
     assert data["message"] == "Input payload validation failed"
 
-
 def test_create_user_fail_missing_data(client):
     """Test creating a user with missing data"""
     response = client.post('/api/v1/users/', json={
@@ -46,7 +45,6 @@ def test_create_user_fail_missing_data(client):
     assert data["errors"]["last_name"] == "'last_name' is a required property"
     assert data["message"] == "Input payload validation failed"
 
-
 def test_create_user_fail_invalid_data(client):
     """Test creating a user with invalid email"""
     response = client.post('/api/v1/users/', json={
@@ -59,7 +57,6 @@ def test_create_user_fail_invalid_data(client):
     assert "errors" in data
     assert "email" in data["errors"]
     assert data["message"] == "Input payload validation failed"
-
 
 def test_create_user_fail_duplicate_email(client, create_user):
     """Test creating a user with a duplicate email"""
@@ -76,7 +73,6 @@ def test_create_user_fail_duplicate_email(client, create_user):
     data = response.get_json()
     assert "error" in data
     assert data["error"] == "Email already registered"
-
 
 def test_get_all_users(client, create_user):
     """Test retrieving all users"""
@@ -105,43 +101,38 @@ def test_get_all_users(client, create_user):
         # Use the actual timestamp from the response
         "created_at": alice["created_at"],
         # Use the actual timestamp from the response
-        "updated_at": alice["updated_at"],
-        "password": alice["password"]
+        "updated_at": alice["updated_at"]
     }
 
     assert alice is not None
+    assert "password" not in alice  # Assert that 'password' is not in the response
     assert alice == expected_alice
-
 
 def test_get_user_by_id(client, create_user):
     """Test retrieving a specific user by ID"""
     user_id = create_user("Betty", "Smith", "betty@example.com")
     response = client.get(f'/api/v1/users/{user_id}')
+    user = response.get_json()
     assert response.status_code == 200
-    assert response.get_json()["email"] == "betty@example.com"
-
+    assert user["email"] == "betty@example.com"
+    assert "password" not in user  # Assert that 'password' is not in the response
 
 def test_get_user_not_found(client):
     """Test retrieving a non-existent user"""
     response = client.get('/api/v1/users/99999')
     assert response.status_code == 404
 
-
 def test_update_user(client, create_user):
     """Test updating an existing user"""
-    # create_user does a post
     user_id = create_user("Bob", "Brown", "bob@example.com")
 
-    # as the user was created w/ post, we can do a put
     response = client.put(f'/api/v1/users/{user_id}', json={
-        # we change the first_name
         "first_name": "Robert",
         "last_name": "Brown",
         "email": "bob@example.com",
     })
     assert response.status_code == 200
     assert response.get_json()["first_name"] == "Robert"
-
 
 def test_update_user_not_found(client):
     """Test updating a non-existent user"""
@@ -152,19 +143,15 @@ def test_update_user_not_found(client):
     })
     assert response.status_code == 404
 
-
 def test_delete_user(client, create_user):
     """Test deleting an existing user"""
-    # Create a user
     user_id = create_user("Charlie", "Chaplin", "charlie@example.com")
 
-    # Delete the user
     response = client.delete(f'/api/v1/users/{user_id}')
     assert response.status_code == 200
     data = response.get_json()
     assert data["message"] == "User deleted successfully"
 
-    # Verify the user is no longer retrievable
     response = client.get(f'/api/v1/users/{user_id}')
     assert response.status_code == 404
     data = response.get_json()
