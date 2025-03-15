@@ -1,33 +1,4 @@
 import pytest
-from app import create_app
-
-
-@pytest.fixture
-def app():
-    """Initialize the Flask application in test mode"""
-    app = create_app(config_name="testing")
-    return app
-
-
-@pytest.fixture
-def client(app):
-    """Create a test client for the Flask application"""
-    return app.test_client()
-
-
-@pytest.fixture
-def create_amenity(client):
-    """Helper function to create an amenity"""
-    def _create_amenity(name):
-        response = client.post('/api/v1/amenities/', json={
-            "name": name
-        })
-        return (
-            response.get_json().get('id')
-            if response.status_code == 201
-            else None
-        )
-    return _create_amenity
 
 
 def test_create_amenity(client):

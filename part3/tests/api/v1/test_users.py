@@ -1,37 +1,4 @@
 import pytest
-from app import create_app
-
-
-@pytest.fixture
-def app():
-    """Initialize the Flask application in test mode"""
-    app = create_app(config_name="testing")
-    return app
-
-
-@pytest.fixture
-def client(app):
-    """Create a test client for the Flask application"""
-    return app.test_client()
-
-
-@pytest.fixture
-def create_user(client):
-    """Helper function to create a user"""
-    def _create_user(first_name, last_name, email, password='12345678'):
-        response = client.post('/api/v1/users/', json={
-            "first_name": first_name,
-            "last_name": last_name,
-            "email": email,
-            "password": password
-        })
-        return (
-            response.get_json().get('id')
-            if response.status_code == 201
-            else None
-        )
-    return _create_user
-
 
 def test_create_user(client):
     """Test the creation of a user"""
@@ -43,7 +10,10 @@ def test_create_user(client):
     })
     assert response.status_code == 201
     data = response.get_json()
+    user_id = data["id"]
     assert "id" in data
+    response = client.get(f'/api/v1/users/{user_id}')
+    data = response.get_json()
     assert data["first_name"] == "Jane"
     assert data["last_name"] == "Doe"
     assert data["email"] == "jane.doe@example.com"
