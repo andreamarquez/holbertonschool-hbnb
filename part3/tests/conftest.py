@@ -1,16 +1,19 @@
 import pytest
 from app import create_app
 
+
 @pytest.fixture
 def app():
     """Initialize the Flask application in test mode"""
     app = create_app(config_name="testing")
     return app
 
+
 @pytest.fixture
 def client(app):
     """Create a test client for the Flask application"""
     return app.test_client()
+
 
 @pytest.fixture
 def create_user(client):
@@ -29,6 +32,7 @@ def create_user(client):
         )
     return _create_user
 
+
 @pytest.fixture
 def create_amenity(client):
     """Helper function to create an amenity"""
@@ -42,6 +46,7 @@ def create_amenity(client):
             else None
         )
     return _create_amenity
+
 
 @pytest.fixture
 def create_place(client):

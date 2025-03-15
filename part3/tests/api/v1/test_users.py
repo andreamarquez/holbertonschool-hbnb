@@ -1,5 +1,6 @@
 import pytest
 
+
 def test_create_user(client):
     """Test the creation of a user"""
     response = client.post('/api/v1/users/', json={
@@ -17,7 +18,8 @@ def test_create_user(client):
     assert data["first_name"] == "Jane"
     assert data["last_name"] == "Doe"
     assert data["email"] == "jane.doe@example.com"
-    assert "password" not in data  # Assert that 'password' is not in the response
+    assert "password" not in data  # Assert 'password' is not in the response
+
 
 def test_create_user_fail_missing_data(client):
     """Test creating a user with missing data"""
@@ -32,6 +34,7 @@ def test_create_user_fail_missing_data(client):
     assert data["errors"]["email"] == "'email' is a required property"
     assert data["message"] == "Input payload validation failed"
 
+
 def test_create_user_fail_missing_data(client):
     """Test creating a user with missing data"""
     response = client.post('/api/v1/users/', json={
@@ -45,6 +48,7 @@ def test_create_user_fail_missing_data(client):
     assert data["errors"]["last_name"] == "'last_name' is a required property"
     assert data["message"] == "Input payload validation failed"
 
+
 def test_create_user_fail_invalid_data(client):
     """Test creating a user with invalid email"""
     response = client.post('/api/v1/users/', json={
@@ -57,6 +61,7 @@ def test_create_user_fail_invalid_data(client):
     assert "errors" in data
     assert "email" in data["errors"]
     assert data["message"] == "Input payload validation failed"
+
 
 def test_create_user_fail_duplicate_email(client, create_user):
     """Test creating a user with a duplicate email"""
@@ -73,6 +78,7 @@ def test_create_user_fail_duplicate_email(client, create_user):
     data = response.get_json()
     assert "error" in data
     assert data["error"] == "Email already registered"
+
 
 def test_get_all_users(client, create_user):
     """Test retrieving all users"""
@@ -105,8 +111,9 @@ def test_get_all_users(client, create_user):
     }
 
     assert alice is not None
-    assert "password" not in alice  # Assert that 'password' is not in the response
+    assert "password" not in alice  # Assert 'password' is not in the response
     assert alice == expected_alice
+
 
 def test_get_user_by_id(client, create_user):
     """Test retrieving a specific user by ID"""
@@ -115,12 +122,14 @@ def test_get_user_by_id(client, create_user):
     user = response.get_json()
     assert response.status_code == 200
     assert user["email"] == "betty@example.com"
-    assert "password" not in user  # Assert that 'password' is not in the response
+    assert "password" not in user  # Assert password' is not in the response
+
 
 def test_get_user_not_found(client):
     """Test retrieving a non-existent user"""
     response = client.get('/api/v1/users/99999')
     assert response.status_code == 404
+
 
 def test_update_user(client, create_user):
     """Test updating an existing user"""
@@ -134,6 +143,7 @@ def test_update_user(client, create_user):
     assert response.status_code == 200
     assert response.get_json()["first_name"] == "Robert"
 
+
 def test_update_user_not_found(client):
     """Test updating a non-existent user"""
     response = client.put('/api/v1/users/99999', json={
@@ -142,6 +152,7 @@ def test_update_user_not_found(client):
         "email": "unknown@example.com",
     })
     assert response.status_code == 404
+
 
 def test_delete_user(client, create_user):
     """Test deleting an existing user"""

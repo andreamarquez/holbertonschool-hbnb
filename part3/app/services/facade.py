@@ -30,7 +30,7 @@ class HBnBFacade:
     def get_all_users(self):
         users = [user.to_dict() for user in self.user_repo.get_all()]
         for user in users:
-            user.pop('password', None)  # Exclude the password from each user dictionary
+            user.pop('password', None)  # Exclude password from user dictionary
         return users
 
     def update_user(self, user_id, user_data):
