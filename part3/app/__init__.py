@@ -1,19 +1,27 @@
 from flask import Flask
 from flask_restx import Api
+from flask_jwt_extended import JWTManager
 from app.api.v1.users import api as users_ns
 from app.api.v1.amenities import api as amenities_ns
 from app.api.v1.reviews import api as reviews_ns
 from app.api.v1.places import api as places_ns
 from app.utils.encryption import bcrypt
+from config import config
+
+# Instantiate JWTManager
+jwt = JWTManager()
 
 
 def create_app(config_name="development"):
     app = Flask(__name__)
-    config_class = f'config.{config_name.capitalize()}Config'
+    config_class = config[config_name]
     app.config.from_object(config_class)
 
     # Initialize Bcrypt with the Flask app
     bcrypt.init_app(app)
+
+    # Initialize JWTManager with the Flask app
+    jwt.init_app(app)
 
     api = Api(
         app,
