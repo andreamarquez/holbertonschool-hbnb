@@ -11,6 +11,7 @@ from config import config
 # Instantiate JWTManager
 jwt = JWTManager()
 
+
 def create_app(config_name="development"):
     app = Flask(__name__)
     config_class = config[config_name]
