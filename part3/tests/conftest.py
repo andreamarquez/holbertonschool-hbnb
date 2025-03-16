@@ -25,11 +25,9 @@ def create_user(client):
             "email": email,
             "password": password
         })
-        return (
-            response.get_json().get('id')
-            if response.status_code == 201
-            else None
-        )
+        if response.status_code == 201:
+            return response.get_json().get('id')
+        return None
     return _create_user
 
 
@@ -40,16 +38,14 @@ def create_amenity(client):
         response = client.post('/api/v1/amenities/', json={
             "name": name
         })
-        return (
-            response.get_json().get('id')
-            if response.status_code == 201
-            else None
-        )
+        if response.status_code == 201:
+            return response.get_json().get('id')
+        return None
     return _create_amenity
 
 
 @pytest.fixture
-def create_place(client):
+def create_place(client, auth_header):
     """Helper function to create a place"""
     def _create_place(
             title,
@@ -57,7 +53,11 @@ def create_place(client):
             price,
             latitude,
             longitude,
-            owner_id):
+            owner_id,
+            owner_email
+            ):
+        headers = auth_header(owner_email)
+
         response = client.post('/api/v1/places/', json={
             "title": title,
             "description": description,
@@ -66,10 +66,41 @@ def create_place(client):
             "longitude": longitude,
             "owner_id": owner_id,
             "amenities": ["wifi", "pool"]
-        })
-        return (
-            response.get_json().get('id')
-            if response.status_code == 201
-            else None
-        )
+        }, headers=headers)
+        if response.status_code == 201:
+            return response.get_json().get('id')
+        return None
     return _create_place
+
+
+@pytest.fixture
+def auth_header(client):
+    """Helper function to create an authorization header with a JWT token"""
+    def _auth_header(email, password='12345678'):
+        # Check if the user already exists
+        response = client.post('/api/v1/auth/login', json={
+            "email": email,
+            "password": password
+        })
+        if response.status_code == 401:  # User does not exist
+            # Create the user
+            response = client.post('/api/v1/users/', json={
+                "first_name": "John",
+                "last_name": "Doe",
+                "email": email,
+                "password": password
+            })
+            assert response.status_code == 201, \
+                "Failed to create user for authentication"
+
+            # Authenticate the user
+            response = client.post('/api/v1/auth/login', json={
+                "email": email,
+                "password": password
+            })
+
+        assert response.status_code == 200, "Failed to authenticate user"
+        token = response.get_json().get('access_token')
+        assert token is not None, "Failed to get access token"
+        return {'Authorization': f'Bearer {token}'}
+    return _auth_header

@@ -205,3 +205,10 @@ class HBnBFacade:
 
     def delete_review(self, review_id):
         return self.review_repo.delete(review_id)
+
+    # ----- Auth Methods -----
+    def get_verified_user(self, email, password):
+        user = self.user_repo.get_by_attribute("email", email)
+        if not user:
+            return None
+        return user if user.verify_password(password) else None
