@@ -10,7 +10,8 @@ def test_create_review(client, create_user, create_place):
         120.5,
         48.8566,
         2.3522,
-        user_id)
+        user_id,
+        "john.doe0111@example.com")
     response = client.post('/api/v1/reviews/', json={
         "text": "Wow amazing!",
         "rating": 5,
@@ -31,7 +32,8 @@ def test_create_review_invalid_data(client, create_user, create_place):
         120.5,
         48.8566,
         2.3522,
-        user_id)
+        user_id,
+        "john.doe1111@example.com")
     response = client.post('/api/v1/reviews/', json={
         "text": 5,
         "rating": "Weird, rating should be a number",
@@ -57,7 +59,8 @@ def test_get_review_by_id(client, create_user, create_place):
         120.5,
         48.8566,
         2.3522,
-        user_id)
+        user_id,
+        "john.doe2111@example.com")
     review_response = client.post('/api/v1/reviews/', json={
         "text": "Wow amazing!",
         "rating": 5,
@@ -79,7 +82,8 @@ def test_update_review(client, create_user, create_place):
         120.5,
         48.8566,
         2.3522,
-        user_id)
+        user_id,
+        "john.doe3111@example.com")
     review_response = client.post('/api/v1/reviews/', json={
         "text": "Wow amazing!",
         "rating": 5,
@@ -105,7 +109,8 @@ def test_delete_review(client, create_user, create_place):
         120.5,
         48.8566,
         2.3522,
-        user_id)
+        user_id,
+        "john.doe4111@example.com")
     review_response = client.post('/api/v1/reviews/', json={
         "text": "Wow amazing!",
         "rating": 5,
@@ -127,7 +132,8 @@ def test_get_reviews_by_place(client, create_user, create_place):
         120.5,
         48.8566,
         2.3522,
-        user_id)
+        user_id,
+        "john.doe5111@example.com")
     client.post('/api/v1/reviews/', json={
         "text": "Wow amazing!",
         "rating": 5,

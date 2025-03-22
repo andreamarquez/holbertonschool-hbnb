@@ -12,7 +12,15 @@ class User(BaseModel):
         self.is_admin = is_admin
         self.created_at = datetime.now()
         self.updated_at = datetime.now()
-        self.hash_password(password)
+        self.set_password(password)
+
+    def set_password(self, password):
+        # Check if the password is already hashed
+        # (starts with $2 and has a valid bcrypt length)
+        if password.startswith("$2") and len(password) == 60:
+            self.password
+        else:
+            self.hash_password(password)
 
     def hash_password(self, password):
         # Hashes the password before storing it

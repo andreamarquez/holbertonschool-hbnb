@@ -1,5 +1,7 @@
 from flask_restx import Namespace, Resource, fields
+from flask import request
 from app.services import facade
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 api = Namespace('places', description='Place operations')
 
@@ -24,7 +26,7 @@ review_model = api.model('PlaceReview', {
     'user_id': fields.String(description='ID of the user')
 })
 
-# update of place modele for including reviews
+# update of place model for including reviews
 place_model = api.model('Place', {
     'title': fields.String(required=True, description='Place title'),
     'description': fields.String(description='Place description'),
@@ -42,14 +44,20 @@ place_model = api.model('Place', {
 
 @api.route('/')
 class PlaceList(Resource):
+    @jwt_required()
+    @api.doc(security='Bearer')
     @api.expect(place_model, validate=True)
     @api.response(201, 'Place created')
     @api.response(400, 'Invalid data')
+    @api.response(401, 'Unauthorized')
     def post(self):
+        token_user_id = get_jwt_identity()
         """Create a new place"""
         place_data = api.payload
         if not place_data:
             return {'message': 'Invalid data'}, 400
+        if not token_user_id == place_data["owner_id"]:
+            return {'message': 'Unauthorized'}, 401
         new_place = facade.create_place(place_data)
         return new_place, 201
 
@@ -84,16 +92,23 @@ class PlaceResource(Resource):
             return {'message': 'Deleted'}, 200
         return {'message': 'Not found'}, 404
 
+    @jwt_required()
+    @api.doc(security='Bearer')
     @api.expect(place_model)
     @api.response(200, 'Place updated')
     @api.response(404, 'Place not found')
     @api.response(400, 'Invalid data')
+    @api.response(401, 'Unauthorized')
     def put(self, place_id):
+        token_user_id = get_jwt_identity()
         """Update a place's information"""
         place_data = api.payload
         if not place_data:
             return {'message': 'Invalid data'}, 400
+        if not token_user_id == place_data["owner_id"]:
+            return {'message': 'Unauthorized'}, 401
         updated_place = facade.update_place(place_id, place_data)
         if not updated_place:
             return {'message': 'Not found'}, 404
+
         return updated_place, 200
