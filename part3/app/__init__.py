@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
 from flask_restx import Api
 from flask_jwt_extended import JWTManager
 from app.api.v1.users import api as users_ns
@@ -11,12 +12,13 @@ from config import config
 
 # Instantiate JWTManager
 jwt = JWTManager()
-
+db = SQLAlchemy()
 
 def create_app(config_name="development"):
     app = Flask(__name__)
     config_class = config[config_name]
     app.config.from_object(config_class)
+    db.init_app(app)
 
     # Initialize Bcrypt with the Flask app
     bcrypt.init_app(app)
