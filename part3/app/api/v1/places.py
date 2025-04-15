@@ -1,5 +1,4 @@
 from flask_restx import Namespace, Resource, fields
-from flask import request
 from app.services import facade
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
@@ -98,7 +97,7 @@ class PlaceResource(Resource):
     @api.response(200, 'Place updated')
     @api.response(404, 'Place not found')
     @api.response(400, 'Invalid data')
-    @api.response(401, 'Unauthorized')
+    @api.response(403, 'Unauthorized action')
     def put(self, place_id):
         token_user_id = get_jwt_identity()
         """Update a place's information"""
@@ -106,7 +105,7 @@ class PlaceResource(Resource):
         if not place_data:
             return {'message': 'Invalid data'}, 400
         if not token_user_id == place_data["owner_id"]:
-            return {'message': 'Unauthorized'}, 401
+            return {'message': 'Unauthorized action'}, 403
         updated_place = facade.update_place(place_id, place_data)
         if not updated_place:
             return {'message': 'Not found'}, 404

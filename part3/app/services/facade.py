@@ -206,6 +206,14 @@ class HBnBFacade:
     def delete_review(self, review_id):
         return self.review_repo.delete(review_id)
 
+    def get_user_review_for_place(self, user_id, place_id):
+        """Check if a user has already reviewed a specific place."""
+        reviews = self.get_reviews_by_place(place_id)
+        for review in reviews:
+            if review['user_id'] == user_id:
+                return review
+        return None
+
     # ----- Auth Methods -----
     def get_verified_user(self, email, password):
         user = self.user_repo.get_by_attribute("email", email)

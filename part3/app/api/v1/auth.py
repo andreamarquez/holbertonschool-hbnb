@@ -58,8 +58,8 @@ class ProtectedResource(Resource):
         # from the token
         user_id = get_jwt_identity()
         claims = get_jwt()
-        is_admin = claims.get('is_admin', False)
-        email = claims.get('email', False)
+        is_admin = claims.get('is_admin', None)
+        email = claims.get('email', None)
 
         return {
             'message': f'Hello, user {user_id}',
