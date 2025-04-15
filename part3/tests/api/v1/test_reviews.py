@@ -65,8 +65,8 @@ def test_create_duplicate_review(
         "user_id": user_id,
         "place_id": place_id
     }, headers=headers)
-    assert response2.status_code == 409
-    assert response2.json["message"] == "User has already reviewed this place"
+    assert response2.status_code == 400
+    assert response2.json["message"] == "You have already reviewed this place"
 
 
 def test_create_review_invalid_data(
@@ -276,8 +276,8 @@ def test_update_review_restrictions(
         "text": "Not so amazing anymore",
         "rating": 3
     }, headers=other_user_headers)
-    assert update_response.status_code == 401
-    assert update_response.json["message"] == "Unauthorized"
+    assert update_response.status_code == 403
+    assert update_response.json["message"] == "Unauthorized action"
 
     # Original author updates the review
     update_response_author = client.put(f'/api/v1/reviews/{review_id}', json={
@@ -329,8 +329,8 @@ def test_delete_review_restrictions(
     # Attempt to delete the review by another user
     delete_response = client.delete(
         f'/api/v1/reviews/{review_id}', headers=other_user_headers)
-    assert delete_response.status_code == 401
-    assert delete_response.json["message"] == "Unauthorized"
+    assert delete_response.status_code == 403
+    assert delete_response.json["message"] == "Unauthorized action"
 
     # Original author deletes the review
     delete_response_author = client.delete(

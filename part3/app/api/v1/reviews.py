@@ -23,7 +23,8 @@ class ReviewList(Resource):
     @api.expect(review_model, validate=True)
     @api.response(201, 'Review successfully created')
     @api.response(400, 'Invalid input data')
-    @api.response(409, 'User has already reviewed this place')
+    @api.response(400, 'You cannot review your own place')
+    @api.response(400, 'You have already reviewed this place')
     def post(self):
         token_user_id = get_jwt_identity()
         """Register a new review"""
@@ -36,7 +37,7 @@ class ReviewList(Resource):
 
         # check user (from jwt) is not the owner of the place
         if token_user_id == place_data["owner"]:
-            return {'message': 'Unauthorized'}, 401
+            return {'message': 'You cannot review your own place'}, 400
 
         # Check if the user has already reviewed this place
         existing_review = facade.get_user_review_for_place(
@@ -44,7 +45,7 @@ class ReviewList(Resource):
             review_data['place_id'])
         # 409 is for conflict
         if existing_review:
-            return {'message': 'User has already reviewed this place'}, 409
+            return {'message': 'You have already reviewed this place'}, 400
 
         new_review = facade.create_review(review_data)
         if not new_review:
@@ -75,6 +76,7 @@ class ReviewResource(Resource):
     @api.response(200, 'Review updated successfully')
     @api.response(404, 'Review not found')
     @api.response(400, 'Invalid input data')
+    @api.response(403, 'Unauthorized action')
     def put(self, review_id):
         token_user_id = get_jwt_identity()
         """Update a review's information"""
@@ -86,7 +88,7 @@ class ReviewResource(Resource):
 
         # check user (from jwt) is the original author of the review
         if not token_user_id == existing_review["user_id"]:
-            return {'message': 'Unauthorized'}, 401
+            return {'message': 'Unauthorized action'}, 403
         updated_review = facade.update_review(review_id, review_data)
         if not updated_review:
             return {'error': 'Review not found or invalid data'}, 404
@@ -97,6 +99,7 @@ class ReviewResource(Resource):
     @api.doc(security='Bearer')
     @api.response(200, 'Review deleted successfully')
     @api.response(404, 'Review not found')
+    @api.response(403, 'Unauthorized action')
     def delete(self, review_id):
         token_user_id = get_jwt_identity()
 
@@ -106,7 +109,7 @@ class ReviewResource(Resource):
 
         # check user (from jwt) is the original author of the review
         if not token_user_id == existing_review["user_id"]:
-            return {'message': 'Unauthorized'}, 401
+            return {'message': 'Unauthorized action'}, 403
         """Delete a review"""
         success = facade.delete_review(review_id)
         if not success:
