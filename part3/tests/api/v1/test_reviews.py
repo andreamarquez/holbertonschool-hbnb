@@ -318,12 +318,16 @@ def test_delete_review_restrictions(
     review_id = review_response.get_json().get('id')
 
     # Try to delete the review as another user
-    response = client.delete(f'/api/v1/reviews/{review_id}', headers=other_user_headers)
+    response = client.delete(
+        f'/api/v1/reviews/{review_id}',
+        headers=other_user_headers)
     assert response.status_code == 403
     assert response.json["message"] == "Unauthorized action"
 
     # Delete the review as the author (should succeed)
-    delete_response_author = client.delete(f'/api/v1/reviews/{review_id}', headers=author_headers)
+    delete_response_author = client.delete(
+        f'/api/v1/reviews/{review_id}',
+        headers=author_headers)
     assert delete_response_author.status_code == 200
     assert delete_response_author.json["message"] == \
         "Review deleted successfully"
@@ -341,21 +345,35 @@ def create_amenities(client):
         return ids
     return _create_amenities
 
-# Patch create_place to accept amenity IDs
+
 @pytest.fixture
 def create_place(client, create_user, auth_header, create_amenities):
-    def _create_place(title, description, price, latitude, longitude, owner_id, owner_email, amenity_names=None):
+    def _create_place(
+        title,
+        description,
+        price,
+        latitude,
+        longitude,
+        owner_id,
+        owner_email,
+        amenity_names=None
+    ):
         headers = auth_header(owner_email)
-        amenity_ids = create_amenities(amenity_names or [f"wifi_{uuid.uuid4().hex[:4]}"])
-        response = client.post('/api/v1/places/', json={
-            "title": title,
-            "description": description,
-            "price": price,
-            "latitude": latitude,
-            "longitude": longitude,
-            "owner_id": owner_id,
-            "amenities": amenity_ids
-        }, headers=headers)
+        amenity_ids = create_amenities(
+            amenity_names or [f"wifi_{uuid.uuid4().hex[:4]}"])
+        response = client.post(
+            '/api/v1/places/',
+            json={
+                "title": title,
+                "description": description,
+                "price": price,
+                "latitude": latitude,
+                "longitude": longitude,
+                "owner_id": owner_id,
+                "amenities": amenity_ids
+            },
+            headers=headers
+        )
         assert response.status_code == 201
         return response.get_json().get('id')
     return _create_place

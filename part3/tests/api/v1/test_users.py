@@ -92,14 +92,16 @@ def test_get_all_users(client, create_user):
     data = response.get_json()
     assert isinstance(data, list)
     # Filter the response data to find the user with the unique email
-    alice = next((user for user in data if user["email"] == unique_email), None)
+    alice = next(
+        (user for user in data if user["email"] == unique_email),
+        None)
 
     assert alice is not None
     assert "password" not in alice  # Assert 'password' is not in the response
     assert alice["first_name"] == "Alice"
     assert alice["last_name"] == "Smith"
     assert alice["email"] == unique_email
-    assert alice["is_admin"] == False
+    assert alice["is_admin"] is False
     assert "created_at" in alice
     assert "updated_at" in alice
 
@@ -141,7 +143,8 @@ def test_update_user_unauthorized(client, create_user, auth_header):
     # to try a non existing user update
     user_email = f"bobbob{uuid.uuid4().hex[:6]}@example.com"
     user_id = create_user("Bob", "Brown", user_email)
-    unauthorized_user_email = f"unauth_orized{uuid.uuid4().hex[:6]}@example.com"
+    unauthorized_user_email = (
+        f"unauth_orized{uuid.uuid4().hex[:6]}@example.com")
     unauthorized_user_id = create_user(
         "Unauth", "Orized", unauthorized_user_email)
     unauthorized_headers = auth_header(unauthorized_user_email)

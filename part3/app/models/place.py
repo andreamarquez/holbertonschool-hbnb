@@ -1,27 +1,38 @@
 from datetime import datetime
 from .base_model import BaseModel
 from app.persistence.db import db
+from sqlalchemy.orm import relationship
 
 # Association table for many-to-many relationship between Place and Amenity
 place_amenity = db.Table(
     'place_amenity',
-    db.Column('place_id', db.String(36), db.ForeignKey('places.id'), primary_key=True),
-    db.Column('amenity_id', db.String(36), db.ForeignKey('amenities.id'), primary_key=True)
+    db.Column(
+        'place_id', db.String(36), db.ForeignKey('places.id'), primary_key=True
+    ),
+    db.Column(
+        'amenity_id',
+        db.String(36),
+        db.ForeignKey('amenities.id'),
+        primary_key=True
+    )
 )
 
-class Place(BaseModel):
+
+class Place(BaseModel, db.Model):
     __tablename__ = 'places'
-    
+
     title = db.Column(db.String(128), nullable=False)
-    description = db.Column(db.Text)
+    description = db.Column(db.String(1024), nullable=True)
     price = db.Column(db.Float, nullable=False)
-    latitude = db.Column(db.Float)
-    longitude = db.Column(db.Float)
-    owner = db.Column(db.String(36), nullable=False)  # Owner is id of user who owns the place
+    latitude = db.Column(db.Float, nullable=True)
+    longitude = db.Column(db.Float, nullable=True)
+    owner = db.Column(db.String(60), db.ForeignKey('users.id'), nullable=False)
 
     # Relationships
-    amenities = db.relationship('Amenity', secondary=place_amenity, backref='places')
-    reviews = db.relationship('Review', backref='place_obj', cascade='all, delete-orphan')
+    amenities = relationship(
+        'Amenity', secondary='place_amenity', backref='places')
+    reviews = relationship(
+        'Review', backref='place_obj', cascade='all, delete-orphan')
 
     def __init__(self, title, description, price, latitude, longitude, owner):
         super().__init__()

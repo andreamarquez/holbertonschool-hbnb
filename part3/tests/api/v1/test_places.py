@@ -1,6 +1,7 @@
 import pytest
 import uuid
 
+
 @pytest.fixture
 def create_amenities(client):
     """Helper to create amenities and return their IDs"""
@@ -22,7 +23,10 @@ def test_create_place(client, create_user, auth_header, create_amenities):
     assert owner_id is not None, "Failed to create user"
 
     headers = auth_header(unique_email)
-    amenity_names = [f"wifi_{uuid.uuid4().hex[:4]}", f"pool_{uuid.uuid4().hex[:4]}"]
+    amenity_names = [
+        f"wifi_{uuid.uuid4().hex[:4]}",
+        f"pool_{uuid.uuid4().hex[:4]}"
+        ]
     amenity_ids = create_amenities(amenity_names)
 
     response = client.post('/api/v1/places/', json={
@@ -69,15 +73,19 @@ def test_update_place(client, create_user, auth_header):
     headers = auth_header(unique_email)
 
     # Create a place
-    response = client.post('/api/v1/places/', json={
-        "title": f"Beautiful Apartment {uuid.uuid4().hex[:4]}",
-        "description": "A nice place near the beach",
-        "price": 120.5,
-        "latitude": 48.8566,
-        "longitude": 2.3522,
-        "owner_id": owner_id,
-        "amenities": []
-    }, headers=headers)
+    response = client.post(
+        '/api/v1/places/',
+        json={
+            "title": f"Beautiful Apartment {uuid.uuid4().hex[:4]}",
+            "description": "A nice place near the beach",
+            "price": 120.5,
+            "latitude": 48.8566,
+            "longitude": 2.3522,
+            "owner_id": owner_id,
+            "amenities": []
+        },
+        headers=headers
+    )
     place_id = response.get_json().get('id')
     assert response.status_code == 201
     assert place_id is not None, "Failed to create place"

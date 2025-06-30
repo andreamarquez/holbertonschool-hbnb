@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from app.persistence.db import db  # Assuming the set up SQLAlchemy in my Flask app is done
+from app.persistence.db import db
 from app.models import User, Place, Review, Amenity  # Import your models
 
 

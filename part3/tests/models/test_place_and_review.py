@@ -5,6 +5,7 @@ from app.persistence.db import db
 import pytest
 import uuid
 
+
 def test_place_creation(app):
     """Test place creation with proper app context"""
     with app.app_context():
@@ -28,7 +29,11 @@ def test_place_creation(app):
         db.session.add(place)
         db.session.commit()
 
-        review = Review(text="Great stay!", rating=5, place=place.id, user=owner.id)
+        review = Review(
+            text="Great stay!",
+            rating=5,
+            place=place.id,
+            user=owner.id)
         db.session.add(review)
         place.add_review(review)
         db.session.commit()
