@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
-from app import db  # Assuming the set up SQLAlchemy in my Flask app is done
+from app.persistence.db import db  # Assuming the set up SQLAlchemy in my Flask app is done
 from app.models import User, Place, Review, Amenity  # Import your models
+
 
 class Repository(ABC):
     @abstractmethod
@@ -27,6 +28,7 @@ class Repository(ABC):
     def get_by_attribute(self, attr_name, attr_value):
         pass
 
+
 class SQLAlchemyRepository(Repository):
     def __init__(self, model):
         self.model = model
@@ -45,6 +47,9 @@ class SQLAlchemyRepository(Repository):
         obj = self.get(obj_id)
         if obj:
             for key, value in data.items():
+                if key in ['created_at', 'updated_at']:
+                    # Skip timestamp fields as they are managed by SQLAlchemy
+                    continue
                 setattr(obj, key, value)
             db.session.commit()
 
@@ -53,6 +58,8 @@ class SQLAlchemyRepository(Repository):
         if obj:
             db.session.delete(obj)
             db.session.commit()
+            return True
+        return False
 
     def get_by_attribute(self, attr_name, attr_value):
-        return self.model.query.filter(getattr(self.model, attr_name) == attr_value).first()
+        return self.model.query.filter_by(**{attr_name: attr_value}).first()

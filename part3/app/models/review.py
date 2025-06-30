@@ -1,10 +1,18 @@
 from datetime import datetime
 from .base_model import BaseModel
+from app.persistence.db import db
 # from .user import User
 # from .place import Place
 
 
 class Review(BaseModel):
+    __tablename__ = 'reviews'
+    
+    text = db.Column(db.Text)
+    rating = db.Column(db.Integer, nullable=False)
+    place = db.Column(db.String(36), db.ForeignKey('places.id'), nullable=False)
+    user = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False)
+
     def __init__(self, text, rating, place, user):
         super().__init__()
         self.text = text
@@ -16,9 +24,9 @@ class Review(BaseModel):
 
     def to_dict_with_ids(self):
         """Convert instance to dictionary with owner_id instead of owner"""
-        place_dict = self.to_dict()
-        place_dict['place_id'] = self.place
-        place_dict.pop('place', None)
-        place_dict['user_id'] = self.user
-        place_dict.pop('user', None)
-        return place_dict
+        review_dict = self.to_dict()
+        review_dict['place_id'] = self.place
+        review_dict.pop('place', None)
+        review_dict['user_id'] = self.user
+        review_dict.pop('user', None)
+        return review_dict
