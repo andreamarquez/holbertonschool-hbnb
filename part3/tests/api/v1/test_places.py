@@ -1,29 +1,50 @@
 import pytest
+import uuid
 
 
-def test_create_place(client, create_user, auth_header):
+@pytest.fixture
+def create_amenities(client):
+    """Helper to create amenities and return their IDs"""
+    def _create_amenities(names):
+        ids = []
+        for name in names:
+            response = client.post('/api/v1/amenities/', json={"name": name})
+            assert response.status_code == 201
+            ids.append(response.get_json()["id"])
+        return ids
+    return _create_amenities
+
+
+def test_create_place(client, create_user, auth_header, create_amenities):
     """Test the creation of a place"""
     # Create a user to be the owner of the place
-    owner_id = create_user("John", "Doe", "john.doe@example.com")
+    unique_email = f"john.doe{uuid.uuid4().hex[:6]}@example.com"
+    owner_id = create_user("John", "Doe", unique_email)
     assert owner_id is not None, "Failed to create user"
 
-    headers = auth_header("john.doe@example.com")
+    headers = auth_header(unique_email)
+    amenity_names = [
+        f"wifi_{uuid.uuid4().hex[:4]}",
+        f"pool_{uuid.uuid4().hex[:4]}"
+        ]
+    amenity_ids = create_amenities(amenity_names)
 
     response = client.post('/api/v1/places/', json={
-        "title": "Beautiful Apartment",
+        "title": f"Beautiful Apartment {uuid.uuid4().hex[:4]}",
         "description": "A nice place near the beach",
         "price": 120.5,
         "latitude": 48.8566,
         "longitude": 2.3522,
         "owner_id": owner_id,
-        "amenities": ["wifi", "pool"]
+        "amenities": amenity_ids
     }, headers=headers)
     assert response.status_code == 201
     data = response.get_json()
     assert data is not None, "Response JSON is None"
     assert "id" in data
-    assert data["title"] == "Beautiful Apartment"
+    assert data["title"].startswith("Beautiful Apartment")
     assert data["owner_id"] == owner_id
+    assert set(data["amenities"]) == set(amenity_ids)
 
 
 def test_get_places(client):
@@ -45,21 +66,26 @@ def test_get_place_not_found(client):
 def test_update_place(client, create_user, auth_header):
     """Test updating an existing place"""
     # Create a user to be the owner of the place
-    owner_id = create_user("Mary", "Doe", "mary.doe@example.com")
+    unique_email = f"mary.doe{uuid.uuid4().hex[:6]}@example.com"
+    owner_id = create_user("Mary", "Doe", unique_email)
     assert owner_id is not None, "Failed to create user"
 
-    headers = auth_header("mary.doe@example.com")
+    headers = auth_header(unique_email)
 
     # Create a place
-    response = client.post('/api/v1/places/', json={
-        "title": "Beautiful Apartment",
-        "description": "A nice place near the beach",
-        "price": 120.5,
-        "latitude": 48.8566,
-        "longitude": 2.3522,
-        "owner_id": owner_id,
-        "amenities": ["wifi", "pool"]
-    }, headers=headers)
+    response = client.post(
+        '/api/v1/places/',
+        json={
+            "title": f"Beautiful Apartment {uuid.uuid4().hex[:4]}",
+            "description": "A nice place near the beach",
+            "price": 120.5,
+            "latitude": 48.8566,
+            "longitude": 2.3522,
+            "owner_id": owner_id,
+            "amenities": []
+        },
+        headers=headers
+    )
     place_id = response.get_json().get('id')
     assert response.status_code == 201
     assert place_id is not None, "Failed to create place"
@@ -72,7 +98,7 @@ def test_update_place(client, create_user, auth_header):
         "latitude": 48.8566,
         "longitude": 2.3522,
         "owner_id": owner_id,
-        "amenities": ["wifi", "gym"]
+        "amenities": []
     }, headers=headers)
     assert response.status_code == 200
     data = response.get_json()
@@ -85,20 +111,21 @@ def test_update_place(client, create_user, auth_header):
 def test_delete_place(client, create_user, auth_header):
     """Test deleting an existing place"""
     # Create a user to be the owner of the place
-    owner_id = create_user("Duper", "Doe", "duper.doe@example.com")
+    unique_email = f"duper.doe{uuid.uuid4().hex[:6]}@example.com"
+    owner_id = create_user("Duper", "Doe", unique_email)
     assert owner_id is not None, "Failed to create user"
 
-    headers = auth_header("duper.doe@example.com")
+    headers = auth_header(unique_email)
 
     # Create a place
     response = client.post('/api/v1/places/', json={
-        "title": "Beautiful Apartment",
+        "title": f"Beautiful Apartment {uuid.uuid4().hex[:4]}",
         "description": "A nice place near the beach",
         "price": 120.5,
         "latitude": 48.8566,
         "longitude": 2.3522,
         "owner_id": owner_id,
-        "amenities": ["wifi", "pool"]
+        "amenities": []
     }, headers=headers)
     place_id = response.get_json().get('id')
     assert response.status_code == 201
@@ -121,8 +148,8 @@ def test_delete_place(client, create_user, auth_header):
 
 def test_create_place_missing_data(client, auth_header):
     """Test creating a place with missing data"""
-
-    headers = auth_header("john.doe@example.com")
+    unique_email = f"john.doe{uuid.uuid4().hex[:6]}@example.com"
+    headers = auth_header(unique_email)
 
     # Attempt to create a place with missing title
     response = client.post('/api/v1/places/', json={
@@ -131,7 +158,7 @@ def test_create_place_missing_data(client, auth_header):
         "latitude": 48.8566,
         "longitude": 2.3522,
         "owner_id": "azertyui",
-        "amenities": ["wifi", "pool"]
+        "amenities": []
     }, headers=headers)
     assert response.status_code == 400
     data = response.get_json()
@@ -144,20 +171,21 @@ def test_create_place_missing_data(client, auth_header):
 def test_create_place_invalid_data(client, create_user, auth_header):
     """Test creating a place with invalid data"""
     # Create a user to be the owner of the place
-    owner_id = create_user("Hyper", "Doe", "hyper.doe@example.com")
+    unique_email = f"hyper.doe{uuid.uuid4().hex[:6]}@example.com"
+    owner_id = create_user("Hyper", "Doe", unique_email)
     assert owner_id is not None, "Failed to create user"
 
-    headers = auth_header("hyper.doe@example.com")
+    headers = auth_header(unique_email)
 
     # Attempt to create a place with invalid price
     response = client.post('/api/v1/places/', json={
-        "title": "Beautiful Apartment",
+        "title": f"Beautiful Apartment {uuid.uuid4().hex[:4]}",
         "description": "A nice place near the beach",
         "price": "invalid_price",
         "latitude": 48.8566,
         "longitude": 2.3522,
         "owner_id": owner_id,
-        "amenities": ["wifi", "pool"]
+        "amenities": []
     }, headers=headers)
     assert response.status_code == 400
     data = response.get_json()

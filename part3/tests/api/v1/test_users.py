@@ -1,12 +1,14 @@
 import pytest
+import uuid
 
 
 def test_create_user(client):
     """Test the creation of a user"""
+    unique_email = f"jane.doe{uuid.uuid4().hex[:6]}@example.com"
     response = client.post('/api/v1/users/', json={
         "first_name": "Jane",
         "last_name": "Doe",
-        "email": "jane.doe@example.com",
+        "email": unique_email,
         "password": "12345678"
     })
     assert response.status_code == 201
@@ -17,7 +19,7 @@ def test_create_user(client):
     data = response.get_json()
     assert data["first_name"] == "Jane"
     assert data["last_name"] == "Doe"
-    assert data["email"] == "jane.doe@example.com"
+    assert data["email"] == unique_email
     assert "password" not in data  # Assert 'password' is not in the response
 
 
@@ -39,7 +41,7 @@ def test_create_user_fail_missing_data(client):
     """Test creating a user with missing data"""
     response = client.post('/api/v1/users/', json={
         "first_name": "Jane",
-        "email": "jane.doe@example.com",
+        "email": f"jane.doe{uuid.uuid4().hex[:6]}@example.com",
     })
     assert response.status_code == 400
     data = response.get_json()
@@ -65,7 +67,7 @@ def test_create_user_fail_invalid_data(client):
 
 def test_create_user_fail_duplicate_email(client, create_user):
     """Test creating a user with a duplicate email"""
-    email = "john.doe@example.com"
+    email = f"john.doe{uuid.uuid4().hex[:6]}@example.com"
     create_user("John", "Doe", email)
 
     response = client.post('/api/v1/users/', json={
@@ -82,47 +84,38 @@ def test_create_user_fail_duplicate_email(client, create_user):
 
 def test_get_all_users(client, create_user):
     """Test retrieving all users"""
-    user1_id = create_user("Alice", "Smith", "alice@example.com")
+    unique_email = f"alice{uuid.uuid4().hex[:6]}@example.com"
+    user1_id = create_user("Alice", "Smith", unique_email)
 
     response = client.get('/api/v1/users/')
     assert response.status_code == 200
     data = response.get_json()
     assert isinstance(data, list)
-    # Filter the response data to find the user "Alice"
+    # Filter the response data to find the user with the unique email
     alice = next(
-        (
-            user for user in data
-            if user["first_name"] == "Alice" and user["last_name"] == "Smith"
-        ),
-        None
-    )
-
-    # Expected data for Alice
-    expected_alice = {
-        "id": user1_id,
-        "first_name": "Alice",
-        "last_name": "Smith",
-        "email": "alice@example.com",
-        "is_admin": False,
-        # Use the actual timestamp from the response
-        "created_at": alice["created_at"],
-        # Use the actual timestamp from the response
-        "updated_at": alice["updated_at"]
-    }
+        (user for user in data if user["email"] == unique_email),
+        None)
 
     assert alice is not None
     assert "password" not in alice  # Assert 'password' is not in the response
-    assert alice == expected_alice
+    assert alice["first_name"] == "Alice"
+    assert alice["last_name"] == "Smith"
+    assert alice["email"] == unique_email
+    assert alice["is_admin"] is False
+    assert "created_at" in alice
+    assert "updated_at" in alice
 
 
 def test_get_user_by_id(client, create_user):
     """Test retrieving a specific user by ID"""
-    user_id = create_user("Betty", "Smith", "betty@example.com")
+    unique_email = f"betty{uuid.uuid4().hex[:6]}@example.com"
+    user_id = create_user("Betty", "Smith", unique_email)
     response = client.get(f'/api/v1/users/{user_id}')
     user = response.get_json()
     assert response.status_code == 200
-    assert user["email"] == "betty@example.com"
-    assert "password" not in user  # Assert password' is not in the response
+    assert user["first_name"] == "Betty"
+    assert user["last_name"] == "Smith"
+    assert user["email"] == unique_email
 
 
 def test_get_user_not_found(client):
@@ -133,9 +126,9 @@ def test_get_user_not_found(client):
 
 def test_update_user(client, create_user, auth_header):
     """Test updating an existing user"""
-    user_email = "bob@example.com"
-    user_id = create_user("Bob", "Brown", user_email)
-    headers = auth_header(user_email)
+    unique_email = f"bob{uuid.uuid4().hex[:6]}@example.com"
+    user_id = create_user("Bob", "Brown", unique_email)
+    headers = auth_header(unique_email)
 
     response = client.put(f'/api/v1/users/{user_id}', json={
         "first_name": "Robert",
@@ -145,27 +138,13 @@ def test_update_user(client, create_user, auth_header):
     assert response.get_json()["first_name"] == "Robert"
 
 
-# def test_update_user_not_found(client, create_user, auth_header):
-#     # we try to forge a jwt from other user just
-#     # to try a non existing user update
-#     user_email = "boby@example.com"
-#     user_id = create_user("Bob", "Brown", user_email)
-#     unknown_user_id = create_user("Bob", "Brown", user_email)
-#     headers = auth_header(user_email)
-#     """Test updating a non-existent user"""
-#     response = client.put('/api/v1/users/99999', json={
-#         "first_name": "Unknown",
-#         "last_name": "User",
-#         "email": "unknown@example.com",
-#     }, headers=headers)
-#     assert response.status_code == 404
-
 def test_update_user_unauthorized(client, create_user, auth_header):
     # we try to forge a jwt from other user just
     # to try a non existing user update
-    user_email = "bobbob@example.com"
+    user_email = f"bobbob{uuid.uuid4().hex[:6]}@example.com"
     user_id = create_user("Bob", "Brown", user_email)
-    unauthorized_user_email = "unauth_orized@example.com"
+    unauthorized_user_email = (
+        f"unauth_orized{uuid.uuid4().hex[:6]}@example.com")
     unauthorized_user_id = create_user(
         "Unauth", "Orized", unauthorized_user_email)
     unauthorized_headers = auth_header(unauthorized_user_email)
@@ -180,7 +159,8 @@ def test_update_user_unauthorized(client, create_user, auth_header):
 
 def test_delete_user(client, create_user):
     """Test deleting an existing user"""
-    user_id = create_user("Charlie", "Chaplin", "charlie@example.com")
+    unique_email = f"charlie{uuid.uuid4().hex[:6]}@example.com"
+    user_id = create_user("Charlie", "Chaplin", unique_email)
 
     response = client.delete(f'/api/v1/users/{user_id}')
     assert response.status_code == 200

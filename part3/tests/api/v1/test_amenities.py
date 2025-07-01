@@ -1,4 +1,5 @@
 import pytest
+import uuid
 
 
 def test_create_amenity(client):
@@ -34,26 +35,21 @@ def test_get_amenity(client, create_amenity):
 
 def test_get_amenities(client, create_amenity):
     """Test retrieving the list of amenities"""
-    amenity_id = create_amenity("Pool")
+    unique_name = f"Pool_{uuid.uuid4().hex[:8]}"
+    amenity_id = create_amenity(unique_name)
     response = client.get('/api/v1/amenities/')
     assert response.status_code == 200
     data = response.get_json()
     assert isinstance(data, list)
     pool = next(
-        (amenity for amenity in data if amenity["name"] == "Pool"),
+        (amenity for amenity in data if amenity["name"] == unique_name),
         None)
 
-    expected_amenity = {
-        "id": amenity_id,
-        "name": "Pool",
-        # Use the actual timestamp from the response
-        "created_at": pool["created_at"],
-        # Use the actual timestamp from the response
-        "updated_at": pool["updated_at"]
-    }
-
     assert pool is not None
-    assert pool == expected_amenity
+    assert pool["id"] == amenity_id
+    assert pool["name"] == unique_name
+    assert "created_at" in pool
+    assert "updated_at" in pool
 
 
 def test_get_non_existent_amenity(client):

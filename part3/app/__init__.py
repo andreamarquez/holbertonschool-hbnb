@@ -7,6 +7,7 @@ from app.api.v1.reviews import api as reviews_ns
 from app.api.v1.places import api as places_ns
 from app.api.v1.auth import api as auth_ns
 from app.utils.encryption import bcrypt
+from app.persistence.db import db
 from config import config
 
 # Instantiate JWTManager
@@ -17,6 +18,7 @@ def create_app(config_name="development"):
     app = Flask(__name__)
     config_class = config[config_name]
     app.config.from_object(config_class)
+    db.init_app(app)
 
     # Initialize Bcrypt with the Flask app
     bcrypt.init_app(app)
@@ -25,6 +27,10 @@ def create_app(config_name="development"):
 
     # Initialize JWTManager with the Flask app
     jwt.init_app(app)
+
+    # Create database tables
+    with app.app_context():
+        db.create_all()
 
     # Add security definitions for Swagger
     authorizations = {

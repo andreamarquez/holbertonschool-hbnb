@@ -1,5 +1,6 @@
 import pytest
 from app import create_app
+from app.persistence.db import db
 
 
 @pytest.fixture
@@ -13,6 +14,20 @@ def app():
 def client(app):
     """Create a test client for the Flask application"""
     return app.test_client()
+
+
+@pytest.fixture(autouse=True)
+def clean_db(app):
+    """Clean the database before and after each test"""
+    with app.app_context():
+        # Drop all tables
+        db.drop_all()
+        # Recreate all tables
+        db.create_all()
+    yield
+    with app.app_context():
+        # Clean up after test
+        db.drop_all()
 
 
 @pytest.fixture
