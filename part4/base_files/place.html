@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Place Details</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/png" href="images/icon.png">
+</head>
+<body>
+    <header>
+        <nav>
+            <img src="images/logo.png" alt="App Logo" class="logo">
+            <a href="index.html">Home</a>
+            <a href="login.html" id="login-link" class="login-button">Login</a>
+        </nav>
+    </header>
+    <main>
+        <section id="place-details">
+            <!-- Place details will be populated dynamically -->
+        </section>
+        <section id="reviews">
+            <!-- Reviews will be populated dynamically -->
+        </section>
+        <section id="add-review" style="display:none;">
+            <h2>Add a Review</h2>
+            <form id="review-form" class="add-review">
+                <label for="review-text">Review:</label>
+                <textarea id="review-text" name="review-text" required></textarea>
+                <button type="submit">Submit</button>
+            </form>
+        </section>
+    </main>
+    <footer>
+        &copy; 2024 All rights reserved.
+    </footer>
+    <script src="scripts.js"></script>
+</body>
+</html>
