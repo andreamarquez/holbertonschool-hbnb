@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_restx import Api
 from flask_jwt_extended import JWTManager
+from flask_cors import CORS
 from app.api.v1.users import api as users_ns
 from app.api.v1.amenities import api as amenities_ns
 from app.api.v1.reviews import api as reviews_ns
@@ -27,6 +28,14 @@ def create_app(config_name="development"):
 
     # Initialize JWTManager with the Flask app
     jwt.init_app(app)
+
+    # Enable CORS for all /api/* endpoints from local front-end origins
+    CORS(app, resources={r"/api/*": {
+        "origins": [
+            "http://localhost:5500",
+            "http://127.0.0.1:5500",
+            "http://localhost:5501",
+            "http://127.0.0.1:5501"]}}, supports_credentials=True)
 
     # Create database tables
     with app.app_context():
