@@ -30,7 +30,12 @@ def create_app(config_name="development"):
     jwt.init_app(app)
 
     # Enable CORS for all /api/* endpoints from local front-end origins
-    CORS(app, resources={r"/api/*": {"origins": ["http://localhost:5500", "http://127.0.0.1:5500"]}}, supports_credentials=True)
+    CORS(app, resources={r"/api/*": {
+        "origins": [
+            "http://localhost:5500",
+            "http://127.0.0.1:5500",
+            "http://localhost:5501",
+            "http://127.0.0.1:5501"]}}, supports_credentials=True)
 
     # Create database tables
     with app.app_context():
